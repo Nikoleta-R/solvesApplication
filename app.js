@@ -1,22 +1,47 @@
-function getInfo() {
-    let stopId = document.getElementById('stopId');
-    let stopName = document.getElementById('stopName');
-    let buses = document.getElementById('buses');
-    let validBuses = ['1287', '1308','1327', '2334']
-    if(!validBuses.includes(stopId.value)){
-        stopName.textContent = "Error";
-        return;
+function solve() {
+const baseUrl = 'https://judgetests.firebaseio.com/schedule/';
+let stopId = 'depot';
+let info = document.querySelector('.info');
+let stopName;
+
+    function depart() {
+        const url = `${baseUrl}${stopId}.json`
+        fetch(url)
+        .then((response)=>response.json())
+        .then((data)=>{
+            stopId = data.next;
+            stopName = data.name;
+            info.textContent = `Next stop ${stopName}`
+        })
+        .catch(()=>{
+            info.textContent = "ERROR";
+        })
+        changeButton();
+        
     }
-    const url = `https://judgetests.firebaseio.com/businfo/${stopId.value}.json `;
-    fetch(url).then((response)=>
-        response.json())
-        .then((busInfo)=>{
-            stopName.textContent = busInfo.name;
-            Object.keys(busInfo.buses).forEach(bus=>{
-                let li = document.createElement('li');
-                li.textContent = `Bus ${bus} arrives in ${busInfo.buses[bus]} minutes`
-                buses.appendChild(li);
-            })
-        });
-        stopId.value = '';
+
+    function arrive() {
+        info.textContent = `Arriving at ${stopName}`;
+
+        changeButton();
+    }
+
+    return {
+        depart,
+        arrive
+    };
+    function changeButton(){
+        let departBtn = document.getElementById('depart');
+        let btnArrive = document.getElementById('arrive');
+        if(departBtn.disabled){
+            departBtn.disabled = false;
+            btnArrive.disabled = true;
+        }else{
+            departBtn.disabled = true;
+            btnArrive.disabled = false;
+        }
+    }
+   
 }
+
+let result = solve();
